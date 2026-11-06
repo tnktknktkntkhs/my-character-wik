@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Character Wiki</title>
+    <meta name="description" content="オリジナルキャラクターの図鑑作成、衣装・表情差分管理、小説執筆、世界観事典、ギャラリー、TRPGデータ連携ができる創作支援Webアプリ" />
+    <meta property="og:title" content="My Character Wiki" />
+    <meta property="og:description" content="オリジナルキャラクターの図鑑作成、衣装・表情差分管理、小説執筆、世界観事典、ギャラリー、TRPGデータ連携ができる創作支援Webアプリ" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- 多言語対応フォント：Noto Sans + 雰囲気ある丸ゴシック/明朝 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+TC:wght@400;700&family=Shippori+Mincho:wght@400;600;700&family=Yuji+Boku&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="app-body">
+    
+    <!-- 背景カスタマイズ用オーバーレイ -->
+    <div id="custom-bg-layer" class="custom-bg-layer"></div>
+
+    <!-- ヘッダー -->
+    <header class="top-header">
+        <div class="header-left">
+            <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            <h1 class="header-title" onclick="switchPage('home-page')">My Character Wiki</h1>
+        </div>
+        
+        <div id="auth-container" class="header-auth-container">
+            <!-- ダークモード切替 -->
+            <button id="themeToggleBtn" class="icon-header-btn" onclick="toggleTheme()" title="テーマ切替">
+                <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
+
+            <!-- 言語切り替え -->
+            <select id="langSelect" class="lang-select" onchange="setLanguage(this.value)" aria-label="Language" data-i18n-title="common.language">
+                <option value="ja">日本語</option>
+                <option value="en">English</option>
+                <option value="ko">한국어</option>
+                <option value="zh-Hans">简体中文</option>
+                <option value="zh-Hant">繁體中文</option>
+            </select>
+
+            <!-- ログイン状態 -->
+            <span id="loginStatus" class="login-status-badge" data-i18n="header.notLoggedIn">閲覧モード</span>
+            
+            <button id="previewToggleBtn" class="header-btn secondary" onclick="togglePreviewMode()" style="display:none;" data-i18n="js.previewAsVisitor">閲覧者として見る</button>
+            <button id="settingsGearBtn" class="icon-header-btn" onclick="openSettingsPanel()" title="公開設定" style="display:none;" data-i18n-title="settings.title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
+
+            <button id="publishBtn" class="header-btn success" onclick="publishToWeb()" style="display:none;" data-i18n="header.publish">ネットに保存</button>
+            
+            <button id="login-btn" class="header-btn google-btn" onclick="loginWithGoogle()" data-i18n="header.googleLogin">Googleでログイン</button>
+            <button id="myPageBtn" class="header-btn primary" onclick="goToMyPage()" style="display: none;" data-i18n="header.myPage">マイページ</button>
+            <button id="switchAccountBtn" class="header-btn secondary" onclick="switchGoogleAccount()" style="display: none;" data-i18n="header.switchAccount">アカウント切替</button>
+            <button id="logout-btn" class="header-btn danger" onclick="logout()" style="display: none;" data-i18n="header.logout">ログアウト</button>
+        </div>
+    </header>
+
+    <!-- サイドバー -->
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h2 data-i18n="sidebar.title">メニュー</h2>
+            <button class="close-btn" onclick="toggleSidebar()">×</button>
+        </div>
+        <ul class="sidebar-menu">
+            <li onclick="switchPage('home-page')" data-i18n="sidebar.home">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                ホーム / ギャラリー
+            </li>
+            <li onclick="switchPage('character-page')" data-i18n="sidebar.characters">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                キャラクター図鑑
+            </li>
+            <li onclick="switchPage('lore-page')" data-i18n="sidebar.lore">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                世界観・用語事典
+            </li>
+            <li onclick="switchPage('novel-page')" data-i18n="sidebar.novel">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>
+                小説・ストーリー
+            </li>
+            <li onclick="switchPage('board-page')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="12" y1="3" x2="12" y2="21"></line><line x1="3" y1="12" x2="21" y2="12"></line></svg>
+                属性十字マップ＆ティア表
+            </li>
+            <li id="cheerInboxMenuBtn" onclick="openCheerInboxModal()" style="display:none;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                届いた応援ボックス
+            </li>
+            <li onclick="openFeedbackModal()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                お問い合わせ・ご意見
+            </li>
+            <li onclick="openHelpModal()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                使い方ガイド・ヘルプ
+            </li>
+        </ul>
+    </div>
+
+    <!-- スマホ用ボトムナビゲーションバー（Feather/Lucide系ミニマルSVG） -->
+    <nav class="mobile-bottom-nav">
+        <button class="bottom-nav-item active" id="bnav-home" onclick="switchPage('home-page')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+            <span class="nav-label" data-i18n="sidebar.homeShort">ホーム</span>
+        </button>
+        <button class="bottom-nav-item" id="bnav-char" onclick="switchPage('character-page')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span class="nav-label" data-i18n="sidebar.charShort">図鑑</span>
+        </button>
+        <button class="bottom-nav-item" id="bnav-lore" onclick="switchPage('lore-page')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span class="nav-label" data-i18n="sidebar.loreShort">事典</span>
+        </button>
+        <button class="bottom-nav-item" id="bnav-novel" onclick="switchPage('novel-page')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path></svg>
+            <span class="nav-label" data-i18n="sidebar.novelShort">小説</span>
+        </button>
+        <button class="bottom-nav-item" onclick="toggleSidebar()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            <span class="nav-label">メニュー</span>
+        </button>
+    </nav>
+
+    <!-- メインコンテンツ -->
+    <div id="main-content" class="main-content">
+
+        <!-- ============================================== -->
+        <!-- 1. ポータルホーム（サイトトップ） -->
+        <!-- ============================================== -->
+        <div id="portal-home-view" style="display: none; padding: 20px;">
+            <div class="home-container">
+                
+                <div class="news-board">
+                    <h3 data-i18n="portal.newsTitle">\ うちよそ管理サイトからのお知らせ /</h3>
+                    <p id="portal-news-content" data-i18n="portal.newsLoading">お知らせを読み込み中...</p>
+                    
+                    <button id="admin-edit-news-btn" onclick="showAdminNewsEditor()" style="display: none;" class="portal-admin-edit-btn" data-i18n="portal.editNewsBtn">[管理者] お知らせ編集</button>
+                </div>
+
+                <div id="admin-news-editor" style="display: none;" class="admin-news-editor-card">
+                    <h4 data-i18n="portal.editNewsTitle">お知らせの編集（管理者モード）</h4>
+                    <textarea id="admin-news-input" placeholder="お知らせ内容を入力してください..." data-i18n-placeholder="portal.newsPlaceholder"></textarea>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="savePortalNews()" class="header-btn success" data-i18n="portal.saveNews">お知らせを保存</button>
+                        <button onclick="document.getElementById('admin-news-editor').style.display='none'" class="header-btn secondary" data-i18n="common.cancel">キャンセル</button>
+                    </div>
+                </div>
+
+                <div class="portal-cta-banner">
+                    <p data-i18n="portal.newPagePrompt">新しいページを作り始めますか？</p>
+                    <button id="create-new-page-btn" class="create-page-glow-btn" data-i18n="portal.createPageBtn">
+                        ＋ 新しいページを作成する
+                    </button>
+                </div>
+
+                <div class="portal-creators-section">
+                    <h2 class="portal-section-title" data-i18n="portal.creatorListTitle">クリエイター一覧</h2>
+                    <p class="portal-section-hint" data-i18n="portal.creatorListHint">名前にマウスを乗せると、各作者のマイページへ行けます！</p>
+                    <div id="author-links-list" class="creators-grid"></div>
+                </div>
+
+                <div class="portal-admin-footer">
+                    <button onclick="loginAsAdmin()" class="admin-login-link" data-i18n="portal.adminLogin">[管理者モードでログイン]</button>
+                    <span id="admin-status" class="admin-status-text"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- 2. 作者マイページ全体枠 -->
+        <!-- ============================================== -->
+        <div id="author-view" style="display: none;">
+            
+            <!-- 作者プロフィールヘッダー -->
+            <div id="author-profile-card" class="author-profile-hero">
+                <div class="profile-hero-content">
+                    <div class="profile-name-area">
+                        <h2 id="profile-name">作者名</h2>
+                        <span id="profileWorldBadge" class="profile-world-badge">創作空間</span>
+                    </div>
+                    <p id="profile-bio">ここに作者の自己紹介（固定メンバーへの一言や、推し傾向など）が表示されます。</p>
+                    
+                    <div class="profile-actions-bar">
+                        <div id="profile-sns-list" class="profile-sns-list"></div>
+                        <div class="profile-user-buttons">
+                            <!-- 作者を応援するボタン -->
+                            <button id="cheerAuthorBtn" class="cheer-author-btn" onclick="openSendCheerModal()">この作者を応援する</button>
+                            <button id="edit-profile-btn" class="edit-profile-btn" onclick="openProfileEditor()" style="display: none;" data-i18n="profile.editBtn">[編集] プロフィール</button>
+                        </div>
+                    </div>
+
+                    <!-- 来場者数アクセスカウンター ＆ キリ番 -->
+                    <div class="visitor-counter-box" id="visitorCounterBox">
+                        <span class="counter-label">累計来場者:</span>
+                        <div class="counter-digits-strip" id="visitorCounterStrip"></div>
+                        <span class="counter-label">人目</span>
+                        <span id="kiribanBadge" class="kiriban-celebrate-badge" style="display:none;">★ キリ番GET!</span>
+                    </div>
+                </div>
+
+                <!-- プロフィール編集パネル -->
+                <div id="profile-editor-panel" class="profile-editor-modal" style="display:none;">
+                    <div class="profile-editor-box">
+                        <h3 data-i18n="profile.editBtn">プロフィール編集</h3>
+                        <label data-i18n="profile.nameLabel">作者名</label>
+                        <input id="profileEditName" placeholder="作者名（ニックネーム）" data-i18n-placeholder="profile.namePlaceholder">
+
+                        <label data-i18n="profile.bioLabel">自己紹介</label>
+                        <textarea id="profileEditBio" placeholder="推し傾向、固定メンバーへの一言など" data-i18n-placeholder="profile.bioPlaceholder"></textarea>
+
+                        <label data-i18n="profile.snsLabel">主要SNS（空欄でOK）</label>
+                        <div id="profileSnsInputs" class="profile-sns-inputs-grid"></div>
+
+                        <label style="margin-top:12px;" data-i18n="profile.extraLinksLabel">その他の外部リンク（自由に追加）</label>
+                        <div style="display:flex; gap:5px; margin-bottom: 6px;">
+                            <input id="profileExtraLinkTitle" placeholder="リンク名（例: 個人サイト）" style="flex:1;" data-i18n-placeholder="profile.linkNamePlaceholder">
+                            <input id="profileExtraLinkUrl" placeholder="https://..." style="flex:2;" data-i18n-placeholder="common.urlPlaceholder">
+                        </div>
+                        <button type="button" class="form-sub-btn" onclick="addProfileExtraLink()" data-i18n="common.addToList">＋ リストに追加</button>
+                        <div id="profileExtraLinkList" class="profile-extra-links-preview"></div>
+
+                        <div style="display:flex; gap:8px; margin-top:16px;">
+                            <button type="button" class="header-btn success" style="flex:1;" onclick="saveAuthorProfile()" data-i18n="common.save">保存する</button>
+                            <button type="button" class="header-btn secondary" style="flex:1;" onclick="closeProfileEditor()" data-i18n="common.cancel">キャンセル</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- 2-A. ホーム / ギャラリー画面 -->
+            <!-- ============================================== -->
+            <div id="home-page" class="page-section">
+                <div class="section-container">
+                    
+                    <!-- 流れる無限カルーセルイラスト -->
+                    <div class="gallery-slider-wrapper">
+                        <div class="slider-container" id="gallerySliderContainer" style="display:none;">
+                            <div class="slider-track" id="gallerySliderTrack"></div>
+                        </div>
+                        <div id="galleryFixedDisplay" class="fixed-display" style="display:none;"></div>
+                    </div>
+
+                    <div class="universe-welcome-banner">
+                        <h2 class="universe-title">Welcome to My Universe</h2>
+                        <p class="universe-sub" data-i18n="home.introText">キャラクター、そして彼らが紡ぐ物語の記録をすべてここにまとめています。</p>
+                    </div>
+
+                    <!-- ギャラリー画像管理UI（作者用） -->
+                    <div class="gallery-manager">
+                        <h3 data-i18n="home.galleryManageTitle">ギャラリー画像の管理</h3>
+                        <p class="section-desc" data-i18n="home.galleryManageDesc">ホーム画面の最上部に流す、自慢の一枚絵を追加・削除・並び替えできます。</p>
+                        
+                        <div class="gallery-add-row">
+                            <input id="galleryImageTitle" placeholder="画像のタイトル（例: 集合絵、立ち絵など）" data-i18n-placeholder="home.galleryTitlePlaceholder">
+                            <input type="file" id="galleryImageFile" accept="image/*">
+                            <button type="button" class="header-btn primary" onclick="addGalleryImage()" data-i18n="home.addImageBtn">画像を追加</button>
+                        </div>
+
+                        <div class="registered-gallery-box">
+                            <strong data-i18n="home.registeredImagesLabel">登録済み画像一覧:</strong>
+                            <div id="galleryList" class="gallery-thumb-list"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- 2-B. キャラクター図鑑画面 -->
+            <!-- ============================================== -->
+            <div id="character-page" class="page-section" style="display:none;">
+                
+                <div class="char-page-header">
+                    <h1 data-i18n="char.pageTitle">キャラクター図鑑</h1>
+                    <div class="char-header-actions">
+                        <button class="random-pick-btn" onclick="showRandomCharacter()" data-i18n="char.randomPickBtn">[!] 今日描くキャラを抽選</button>
+                    </div>
+                </div>
+
+                <!-- 検索コントロールエリア -->
+                <div class="search-control-bar">
+                    <div class="search-input-wrapper">
+                        <input id="search" placeholder="キャラクター名・性格・タグ・メモで検索..." oninput="display()" data-i18n-placeholder="common.search">
+                        <div id="searchSuggestPopup" class="search-suggest-popup" style="display:none;"></div>
+                    </div>
+                    <button type="button" onclick="toggleAdvancedSearch()" id="advancedSearchToggleBtn" class="filter-toggle-btn" data-i18n="char.advancedSearchBtn">詳細絞り込み（世界線・タグ）</button>
+                    
+                    <select id="sort" class="sort-select" onchange="display()">
+                        <option value="new" data-i18n="char.sortNew">新しい順</option>
+                        <option value="old" data-i18n="char.sortOld">古い順</option>
+                        <option value="name" data-i18n="char.sortName">名前順</option>
+                        <option value="favorite" data-i18n="char.sortFavorite">★ お気に入り順</option>
+                    </select>
+                    <button type="button" id="cardHeightToggleBtn" onclick="toggleCardHeightMode()" class="filter-toggle-btn" title="カードの高さ（均等に揃える / 内容に合わせた自然な高さ）">カード揃え: 自然な高さ</button>
+                </div>
+
+                <div id="advancedSearchPanel" style="display:none;" class="advanced-search-panel">
+                    <input id="worldFilter" placeholder="世界線で検索" oninput="display()" data-i18n-placeholder="char.worldSearchPlaceholder">
+                    <div class="filter-group-label" data-i18n="char.worldPickLabel">世界線から選ぶ:</div>
+                    <div id="worldButtons" class="world-tag-buttons"></div>
+                    <div class="filter-group-label" data-i18n="char.tagPickLabel">タグから選ぶ:</div>
+                    <div id="tagList" class="world-tag-buttons"></div>
+                </div>
+
+                <div id="trashButtonContainer" style="margin: 10px 0;"></div>
+                <div id="trashPanel" style="display:none;" class="trash-panel-card">
+                    <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 10px;">
+                        <strong data-i18n="trash.title">ゴミ箱（30日間保管後に完全削除されます）</strong>
+                        <button type="button" onclick="toggleTrashPanel()" class="header-btn secondary" data-i18n="common.close">閉じる</button>
+                    </div>
+                    <div id="trashList" class="trash-list-container"></div>
+                </div>
+
+                <!-- キャラカード一覧 -->
+                <div class="main-layout">
+                    <!-- 入力フォーム -->
+                    <div class="form" id="charFormPanel">
+                        <div class="form-header-bar">
+                            <span class="form-header-title">キャラクター登録・編集</span>
+                            <div style="display:flex; gap:6px;">
+                                <button type="button" onclick="toggleFormFullscreen()" id="fullscreen-toggle-btn" class="form-tool-btn" data-i18n="char.fullscreenBtn">大画面</button>
+                                <button type="button" onclick="closeFormPanel()" class="form-close-x-btn">✕</button>
+                            </div>
+                        </div>
+
+                        <!-- タブ切り替え -->
+                        <div class="form-tabs-bar">
+                            <button type="button" class="form-tab-btn active" onclick="switchFormTab('tab-basic')">基本情報</button>
+                            <button type="button" class="form-tab-btn" onclick="switchFormTab('tab-visual')">衣装・差分</button>
+                            <button type="button" class="form-tab-btn" onclick="switchFormTab('tab-details')">メモ・詳細</button>
+                            <button type="button" class="form-tab-btn" onclick="switchFormTab('tab-relations')">関係性・動画</button>
+                            <button type="button" class="form-tab-btn" onclick="switchFormTab('tab-import')">他サイト連携</button>
+                        </div>
+
+                        <div class="form-body-scroll">
+                            <!-- タブ1: 基本情報 -->
+                            <div id="tab-basic" class="form-tab-content active">
+                                <label class="input-label">名前 <span class="required">*必須</span></label>
+                                <input id="name" placeholder="名前" data-i18n-placeholder="char.namePlaceholder">
+
+                                <label class="input-label">ふりがな（カードにルビ表示）</label>
+                                <input id="furigana" placeholder="ふりがな" data-i18n-placeholder="char.furiganaPlaceholder">
+
+                                <div class="form-grid-2">
+                                    <div>
+                                        <label class="input-label">世界線・作品名</label>
+                                        <input id="world" placeholder="例: ファンタジー、学園" data-i18n-placeholder="char.worldPlaceholder">
+                                    </div>
+                                    <div>
+                                        <label class="input-label">所属組織・ユニット</label>
+                                        <input id="group" placeholder="例: 警備隊、第3班" data-i18n-placeholder="char.groupPlaceholder">
+                                    </div>
+                                </div>
+
+                                <div class="form-grid-2">
+                                    <div>
+                                        <label class="input-label">職業</label>
+                                        <input id="occupation" placeholder="職業・肩書き" data-i18n-placeholder="char.occupationPlaceholder">
+                                    </div>
+                                    <div>
+                                        <label class="input-label">性格・属性</label>
+                                        <input id="personality" placeholder="性格" data-i18n-placeholder="char.personalityPlaceholder">
+                                    </div>
+                                </div>
+
+                                <div class="form-grid-2">
+                                    <div>
+                                        <label class="input-label">誕生日</label>
+                                        <input id="birthday" placeholder="例: 3月14日 / 3/14" data-i18n-placeholder="char.birthdayPlaceholder">
+                                    </div>
+                                    <div>
+                                        <label class="input-label" data-i18n="char.favColorLabel">推し色・イメージカラー:</label>
+                                        <input type="color" id="color" value="#5865f2" class="color-picker-input">
+                                    </div>
+                                </div>
+
+                                <label class="input-label">タグ (カンマ区切り)</label>
+                                <input id="tag" placeholder="主人公, 剣士, クール" data-i18n-placeholder="char.tagPlaceholder">
+
+                                <label class="public-checkbox-label">
+                                    <input type="checkbox" id="isPublic">
+                                    <span data-i18n="char.isPublicLabel">このキャラクターを公開する（チェックを外すと自分にしか見えない非公開状態になります）</span>
+                                </label>
+                            </div>
+
+                            <!-- タブ2: 立ち絵・衣装・表情差分 -->
+                            <div id="tab-visual" class="form-tab-content">
+                                <div class="form-sub-card">
+                                    <label class="sub-card-title" data-i18n="char.costumeLabel">衣装・立ち絵の登録（メインも別衣装もここから！）</label>
+                                    <div class="form-grid-2" style="margin-bottom:6px;">
+                                        <input id="imageTitle" placeholder="衣装名（例：メイン、制服、幼少期）" data-i18n-placeholder="char.costumeNamePlaceholder">
+                                        <input type="file" id="imageFile" accept="image/*">
+                                    </div>
+                                    <button type="button" onclick="addImageToList()" class="form-sub-btn" data-i18n="char.addCostumeBtn">＋ 衣装をリストに追加</button>
+                                    <div id="tempImageList" class="costume-list-container"></div>
+                                </div>
+
+                                <div class="form-sub-card">
+                                    <label class="sub-card-title" data-i18n="char.thumbPositionLabel">カードでのサムネイル表示位置（トリミング）:</label>
+                                    <select id="char-image-position">
+                                        <option value="contain">全体表示（見切れなし・比率維持）</option>
+                                        <option value="top" data-i18n="char.thumbTop">上（顔を優先・トリミング）</option>
+                                        <option value="center" selected data-i18n="char.thumbCenter">真ん中（中心部・トリミング）</option>
+                                        <option value="bottom" data-i18n="char.thumbBottom">下（足元を優先・トリミング）</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-sub-card">
+                                    <label class="sub-card-title" data-i18n="char.galleryUploadLabel">キャラ個別ギャラリー（個別ページ下部に並びます）</label>
+                                    <div class="form-grid-2" style="margin-bottom:6px;">
+                                        <input id="charGalleryTitle" placeholder="画像のタイトル（任意）" data-i18n-placeholder="char.galleryTitlePlaceholder">
+                                        <input type="file" id="charGalleryFile" accept="image/*">
+                                    </div>
+                                    <button type="button" onclick="addCharacterGalleryImage()" class="form-sub-btn" data-i18n="char.addGalleryImageBtn">＋ ギャラリーに追加</button>
+                                    <div id="tempCharGalleryList" class="temp-char-gallery-list"></div>
+                                </div>
+                            </div>
+
+                            <!-- タブ3: メモ・詳細・AI生成 -->
+                            <div id="tab-details" class="form-tab-content">
+                                <div class="form-sub-card">
+                                    <label class="sub-card-title" data-i18n="char.memoLabel">メモ・詳細設定（項目ごとに分けてアコーディオン化）</label>
+                                    <textarea id="memo" style="display:none;"></textarea>
+                                    <div id="memoContainer" class="memo-cards-container"></div>
+                                    <button type="button" onclick="addMemoInputField()" class="form-sub-btn" data-i18n="char.addMemoBtn">＋ 新しいメモ枠を追加</button>
+                                </div>
+
+                                <button type="button" onclick="generateAIStory()" class="ai-generate-glow-btn" data-i18n="char.aiStoryBtn">AIにバックストーリーを執筆してもらう</button>
+                            </div>
+
+                            <!-- タブ4: 関係性・リンク・YouTube -->
+                            <div id="tab-relations" class="form-tab-content">
+                                <div class="form-sub-card">
+                                    <label class="sub-card-title" data-i18n="char.relationsLabel">関係性の追加（他キャラと相互リンク）</label>
+                                    <div class="form-grid-2" style="margin-bottom:6px;">
+                                        <input id="relationTitle" placeholder="関係（相棒、ライバル、片思い等）" data-i18n-placeholder="char.relationTitlePlaceholder">
+                                        <select id="relationTargetId"></select>
+                                    </div>
+                                    <button type="button" onclick="addRelationToList()" class="form-sub-btn" data-i18n="common.addRelation">＋ リストに関係性を追加</button>
+                                    <div id="tempRelationList" class="chips-container"></div>
+                                </div>
+
+                                <div class="form-sub-card">
+                                    <label class="sub-card-title" data-i18n="char.linksLabel">関連リンク（いあきゃら、Pixiv、個人サイト等）</label>
+                                    <div class="form-grid-2" style="margin-bottom:6px;">
+                                        <input id="linkTitle" placeholder="リンク先タイトル" data-i18n-placeholder="char.linkTitlePlaceholder">
+                                        <input id="linkUrl" placeholder="https://..." data-i18n-placeholder="common.urlPlaceholder">
+                                    </div>
+                                    <button type="button" onclick="addLinkToList()" class="form-sub-btn" data-i18n="common.addLinkToList">＋ リンクを追加</button>
+                                    <div id="tempLinkList" class="chips-container"></div>
+                                </div>
+
+                                <div class="form-sub-card">
+                                    <label class="sub-card-title" data-i18n="char.themeVideoLabel">イメソン・テーマ動画（YouTube）</label>
+                                    <div id="youtubeContainer" class="youtube-inputs-container"></div>
+                                    <button type="button" onclick="addYoutubeInputField()" class="form-sub-btn" data-i18n="char.addVideoBtn">＋ 動画URLを追加</button>
+                                </div>
+                            </div>
+
+                            <!-- タブ5: インポート＆バックアップ -->
+                            <div id="tab-import" class="form-tab-content">
+                                <div class="form-sub-card" style="background:rgba(99,102,241,0.04); border-color:var(--primary);">
+                                    <strong style="color:var(--primary);">ココフォリア駒・他サイトテキストをペースト取込</strong>
+                                    <p style="font-size:12px; color:var(--text-muted); margin:4px 0 8px;">
+                                        「いあきゃら」のココフォリア駒出力（JSON）や、各サイトのキャラシートテキストをそのまま貼り付けるだけで、能力値・技能・立ち絵を自動解析して登録します！
+                                    </p>
+                                    <textarea id="externalTextImportArea" placeholder="ここにテキストまたはJSONをペースト..." style="height:90px; font-family:monospace; font-size:12px;"></textarea>
+                                    <button type="button" onclick="importFromExternalText()" class="header-btn primary" style="width:100%; margin-top:6px;" data-i18n="char.parseImportBtn">データを解析して図鑑に追加する</button>
+                                </div>
+
+                                <div class="form-sub-card">
+                                    <strong>JSONファイルからインポート</strong>
+                                    <p style="font-size:12px; color:var(--text-muted); margin:4px 0 6px;">いあきゃら、キャラクター保管所、ゆとシートでダウンロードしたJSONファイルを直接選択</p>
+                                    <input type="file" id="externalImportInput" accept=".json" onchange="handleExternalImport(event)">
+                                </div>
+
+                                <div class="form-sub-card">
+                                    <strong>この図鑑全体のバックアップ</strong>
+                                    <div style="display:flex; gap:6px; margin-top:6px;">
+                                        <button type="button" class="form-sub-btn" onclick="downloadJSON()" data-i18n="char.backupSaveBtn" style="flex:1;">バックアップ保存</button>
+                                        <label class="form-sub-btn" style="flex:1; text-align:center; cursor:pointer;">
+                                            バックアップ読込
+                                            <input type="file" id="loadJSONInput" onchange="loadJSON()" style="display:none;">
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 決定ボタン -->
+                        <div class="form-footer-bar">
+                            <button onclick="addCharacter()" class="form-submit-btn" data-i18n="char.submitBtn">キャラクターを追加・更新</button>
+                        </div>
+                    </div>
+
+                    <!-- カード一覧グリッド -->
+                    <div id="list" class="character-card-grid"></div>
+                </div>
+
+                <!-- 左下の入力フォームFABボタン -->
+                <button type="button" id="form-fab" class="form-fab" onclick="toggleFormPanel()" data-i18n-title="char.formFab"></button>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- 2-C. 世界観・用語事典（World Lore Book） -->
+            <!-- ============================================== -->
+            <div id="lore-page" class="page-section" style="display: none;">
+                <div class="section-container">
+                    
+                    <div class="lore-header-banner">
+                        <div class="lore-header-text">
+                            <h2>世界観・用語事典 (Lore Book)</h2>
+                            <p>創作世界の設定、専門用語、組織、魔法・能力体系、年表を本のようにまとめる事典です。</p>
+                        </div>
+                        <button id="addLoreEntryBtn" class="lore-new-entry-btn" onclick="openLoreEditor()">＋ 新しい用語・設定を追加</button>
+                    </div>
+
+                    <!-- 事典の装丁風コンテナ -->
+                    <div class="lore-grimoire-book">
+                        <!-- 本のインデックス・世界線セレクター -->
+                        <div class="lore-book-index">
+                            <div class="lore-book-title-label">世界線・カテゴリ</div>
+                            <div id="loreCategoryTabs" class="lore-category-tabs"></div>
+                            
+                            <input id="loreSearchInput" placeholder="用語を検索..." oninput="renderLoreEntries()" class="lore-search-input">
+                            <div id="loreIndexList" class="lore-index-list"></div>
+                        </div>
+
+                        <!-- 本の本文ページ -->
+                        <div class="lore-book-page">
+                            <div id="loreEmptyView" class="lore-empty-page">
+                                <div class="lore-empty-icon">[ LORE ]</div>
+                                <h3>左の目次から用語を選択してください</h3>
+                                <p>または右上の「＋ 新しい用語・設定を追加」から新しい設定を記録しましょう。</p>
+                            </div>
+
+                            <div id="loreDetailView" class="lore-detail-page" style="display:none;">
+                                <div class="lore-page-header">
+                                    <div class="lore-meta-tags">
+                                        <span id="loreDetailWorld" class="lore-world-pill">世界線</span>
+                                        <span id="loreDetailCategory" class="lore-category-pill">カテゴリ</span>
+                                    </div>
+                                    <h2 id="loreDetailTitle">用語タイトル</h2>
+                                    <div id="loreDetailReading" class="lore-reading-text">よみがな / 英語名</div>
+                                </div>
+
+                                <div class="lore-page-body">
+                                    <div id="loreDetailImageContainer" class="lore-detail-image-box" style="display:none;">
+                                        <img id="loreDetailImg" src="" alt="設定資料">
+                                    </div>
+                                    <div id="loreDetailContent" class="lore-content-text"></div>
+                                </div>
+
+                                <div id="loreDetailActions" class="lore-page-footer">
+                                    <button onclick="editCurrentLore()" class="header-btn secondary">編集</button>
+                                    <button onclick="deleteCurrentLore()" class="header-btn danger">削除</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 事典の編集モーダル -->
+                    <div id="loreEditorModal" class="custom-modal-overlay" style="display:none;">
+                        <div class="custom-modal-box lore-editor-box">
+                            <h3 id="loreEditorModalTitle">用語・設定の登録</h3>
+                            
+                            <div class="form-grid-2">
+                                <div>
+                                    <label class="input-label">世界線・作品名</label>
+                                    <input id="loreEditWorld" list="loreWorldSuggestions" placeholder="例: 現代異能、ハイファンタジー">
+                                    <datalist id="loreWorldSuggestions"></datalist>
+                                </div>
+                                <div>
+                                    <label class="input-label">カテゴリ</label>
+                                    <input id="loreEditCategory" placeholder="例: 用語、組織、能力体系、歴史">
+                                </div>
+                            </div>
+                            <div style="margin-top:4px; margin-bottom:8px;">
+                                <span style="font-size:11px; color:var(--text-muted);">登録済みキャラの世界線・タグから選択:</span>
+                                <div id="loreWorldQuickPick" class="world-tag-buttons" style="margin-top:4px;"></div>
+                            </div>
+
+                            <label class="input-label">用語・項目名 <span class="required">*</span></label>
+                            <input id="loreEditTitle" placeholder="例: 境界魔術、王立警察機構">
+
+                            <label class="input-label">よみがな・英名（任意）</label>
+                            <input id="loreEditReading" placeholder="例: きょうかいまじゅつ / Boundary Magic">
+
+                            <label class="input-label">画像・設定資料（任意）</label>
+                            <input type="file" id="loreEditImageFile" accept="image/*">
+                            <div id="loreEditImagePreview" class="lore-image-preview-box"></div>
+
+                            <label class="input-label">詳しい解説・設定内容</label>
+                            <textarea id="loreEditContent" placeholder="この用語の概要、由来、ルール、関連するキャラクターなどを自由に執筆..." style="height:180px;"></textarea>
+
+                            <div style="display:flex; gap:8px; margin-top:15px;">
+                                <button type="button" class="header-btn success" style="flex:1;" onclick="saveLoreEntry()">保存する</button>
+                                <button type="button" class="header-btn secondary" style="flex:1;" onclick="closeLoreEditor()">キャンセル</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- 2-D. 小説・ストーリー管理画面（縦書き・読書設定対応） -->
+            <!-- ============================================== -->
+            <div id="novel-page" class="page-section" style="display: none;">
+                <div class="section-container">
+                    
+                    <div class="novel-page-header">
+                        <h2 data-i18n="novel.pageTitle">小説・ストーリー管理</h2>
+                    </div>
+
+                    <div class="novel-overview-card">
+                        <h3 class="novel-overview-heading" data-i18n="novel.overviewTitle">最近のシリーズ</h3>
+                        <div id="novel-series-overview" class="novel-overview"></div>
+                    </div>
+                    
+                    <!-- セレクター（世界線・組織・キャラ） -->
+                    <div class="proseka-selector-container">
+                        <div class="selector-row">
+                            <span class="selector-label" data-i18n="novel.worldLabel">世界線:</span>
+                            <div id="novel-world-buttons" class="selector-buttons"></div>
+                        </div>
+                        <div class="selector-row">
+                            <span class="selector-label" data-i18n="novel.groupLabel">組織・ユニット:</span>
+                            <div id="novel-group-buttons" class="selector-buttons"></div>
+                        </div>
+                        <div class="selector-row">
+                            <span class="selector-label" data-i18n="novel.charLabel">キャラクター:</span>
+                            <div id="novel-char-buttons" class="selector-buttons"></div>
+                        </div>
+                    </div>
+
+                    <div id="novel-workspace" class="novel-workspace-card" style="display: none;">
+                        <div class="novel-workspace-header">
+                            <h3 id="selected-char-title" class="novel-char-title"></h3>
+                        </div>
+                        
+                        <!-- シリーズ選択 -->
+                        <div class="series-select-panel">
+                            <label class="input-label" data-i18n="novel.seriesLabel">選択中の作品（シリーズ）:</label>
+                            <div class="series-control-row">
+                                <select id="novel-series-select" onchange="changeSeries()"></select>
+                                <button type="button" onclick="createNewSeries()" class="header-btn primary" data-i18n="novel.newSeriesBtn">＋ 新作シリーズを作る</button>
+                                <button type="button" onclick="renameCurrentSeries()" class="header-btn secondary" data-i18n="novel.renameSeriesBtn">シリーズ名変更</button>
+                                <button type="button" onclick="deleteCurrentSeries()" class="header-btn danger" data-i18n="novel.deleteSeriesBtn">× 削除</button>
+                            </div>
+                        </div>
+
+                        <!-- 話数タブ -->
+                        <div id="episode-section" style="display: none;" class="episode-tabs-panel">
+                            <label class="input-label" data-i18n="novel.episodesLabel">エピソード（話数）一覧:</label>
+                            <div id="episode-tab-container" class="episode-tabs-list"></div>
+                            <div style="display: flex; gap: 8px; margin-top:8px;">
+                                <button type="button" onclick="createNewEpisode()" class="header-btn primary" data-i18n="novel.newEpisodeBtn">＋ 新しい話を追加</button>
+                                <button type="button" onclick="deleteCurrentEpisode()" class="header-btn danger" data-i18n="novel.deleteEpisodeBtn">× この話を削除</button>
+                            </div>
+                        </div>
+                        
+                        <!-- エディタ & 読書シアター -->
+                        <div id="editor-section" style="display: none;" class="novel-editor-container">
+                            <div class="episode-title-row">
+                                <label class="input-label" data-i18n="novel.subtitleLabel">サブタイトル / 話のタイトル:</label>
+                                <input id="episode-title" placeholder="例：第1話 雨の日の放課後" data-i18n-placeholder="novel.episodeTitlePlaceholder">
+                            </div>
+
+                            <!-- 読書・執筆設定バー（縦書き・文字サイズ・背景色） -->
+                            <div class="novel-toolbar-bar">
+                                <div class="novel-toolbar-group">
+                                    <span class="toolbar-label">表示形式:</span>
+                                    <button type="button" id="novelWritingModeBtn" class="toolbar-btn active" onclick="toggleNovelWritingMode()">縦書き</button>
+                                    <button type="button" id="novelHorizontalModeBtn" class="toolbar-btn" onclick="setNovelWritingMode('horizontal')">横書き</button>
+                                </div>
+                                <div class="novel-toolbar-group">
+                                    <span class="toolbar-label">文字サイズ:</span>
+                                    <button type="button" class="toolbar-btn" onclick="adjustNovelFontSize(-2)">A-</button>
+                                    <button type="button" class="toolbar-btn" onclick="adjustNovelFontSize(2)">A+</button>
+                                </div>
+                                <div class="novel-toolbar-group">
+                                    <span class="toolbar-label">紙の色:</span>
+                                    <button type="button" class="paper-color-dot paper-ivory active" onclick="setNovelPaperTheme('ivory')" title="生成り（本風）"></button>
+                                    <button type="button" class="paper-color-dot paper-white" onclick="setNovelPaperTheme('white')" title="白"></button>
+                                    <button type="button" class="paper-color-dot paper-sepia" onclick="setNovelPaperTheme('sepia')" title="セピア"></button>
+                                    <button type="button" class="paper-color-dot paper-dark" onclick="setNovelPaperTheme('dark')" title="夜間ダーク"></button>
+                                </div>
+                            </div>
+
+                            <!-- AI執筆アシスト -->
+                            <div class="novel-ai-assistant-box">
+                                <p class="ai-desc-text" data-i18n="novel.aiDesc">このキャラクター・シチュエーションに応じた小説をAIに執筆させます。</p>
+                                <div style="display:flex; gap:8px;">
+                                    <input id="novel-theme" placeholder="どんなシチュエーションにする？（例：夜の屋上で秘密の作戦会議）" data-i18n-placeholder="novel.themePlaceholder" style="flex:1;">
+                                    <button type="button" onclick="generateNovelOnPage()" class="ai-write-btn" data-i18n="novel.aiWriteBtn">AI執筆</button>
+                                </div>
+                            </div>
+
+                            <div class="novel-theater-frame">
+                                <strong data-i18n="novel.theaterLabel">本文執筆・閲覧シアター:</strong>
+                                <div id="novel-theater-wrapper" class="novel-theater-wrapper paper-ivory vertical-mode">
+                                    <textarea id="novel-output" placeholder="ここに物語が紡がれます..." data-i18n-placeholder="novel.outputPlaceholder"></textarea>
+                                </div>
+                            </div>
+
+                            <button type="button" onclick="saveNovelText()" class="novel-save-main-btn" data-i18n="novel.saveBtn">この話を保存する</button>
+                        </div>
+                    </div>
+                </div>
+            <!-- ============================================== -->
+            <!-- 2-E. 属性十字マップ ＆ ティア表メーカー -->
+            <!-- ============================================== -->
+            <div id="board-page" class="page-section" style="display:none;">
+                <div class="board-page-wrapper">
+                    <div class="board-header">
+                        <div>
+                            <h1 style="font-family:var(--font-heading); margin:0 0 6px;">属性十字マップ ＆ ティア表メーカー</h1>
+                            <p style="margin:0; font-size:13px; color:var(--text-muted);">キャラクターの立ち位置・性格2軸・関係性やランクを自由に配置して楽しめます。</p>
+                        </div>
+                        <div class="board-mode-tabs">
+                            <button type="button" id="tabBtnMatrix" class="board-mode-tab active" onclick="switchBoardMode('matrix')">十字マップ（2軸）</button>
+                            <button type="button" id="tabBtnTier" class="board-mode-tab" onclick="switchBoardMode('tier')">ティア表（階層）</button>
+                            <button type="button" class="header-btn secondary" onclick="resetBoardTokens()">配置をリセット</button>
+                            <button type="button" class="header-btn success" onclick="saveBoardData()">配置を保存</button>
+                        </div>
+                    </div>
+
+                    <div class="board-main-container">
+                        <!-- 十字マップ表示 -->
+                        <div id="matrixContainer" class="matrix-container">
+                            <div class="matrix-axis-x"></div>
+                            <div class="matrix-axis-y"></div>
+                            
+                            <button type="button" id="matrixLabelTop" class="matrix-label matrix-label-top" onclick="editMatrixLabel('top')">理性的 ▲</button>
+                            <button type="button" id="matrixLabelBottom" class="matrix-label matrix-label-bottom" onclick="editMatrixLabel('bottom')">本能的 ▼</button>
+                            <button type="button" id="matrixLabelLeft" class="matrix-label matrix-label-left" onclick="editMatrixLabel('left')">◀ 内向的</button>
+                            <button type="button" id="matrixLabelRight" class="matrix-label matrix-label-right" onclick="editMatrixLabel('right')">外向的 ▶</button>
+
+                            <div id="matrixPlacedArea" style="position:absolute; inset:0;"></div>
+                        </div>
+
+                        <!-- ティア表表示 -->
+                        <div id="tierContainer" class="tier-container" style="display:none;">
+                            <div class="tier-row" data-tier="S">
+                                <div class="tier-row-label" style="background:#ef4444;" onclick="editTierRowLabel(this)">S</div>
+                                <div class="tier-row-items" ondragover="allowTierDrop(event)" ondrop="handleTierDrop(event, 'S')"></div>
+                            </div>
+                            <div class="tier-row" data-tier="A">
+                                <div class="tier-row-label" style="background:#f97316;" onclick="editTierRowLabel(this)">A</div>
+                                <div class="tier-row-items" ondragover="allowTierDrop(event)" ondrop="handleTierDrop(event, 'A')"></div>
+                            </div>
+                            <div class="tier-row" data-tier="B">
+                                <div class="tier-row-label" style="background:#eab308;" onclick="editTierRowLabel(this)">B</div>
+                                <div class="tier-row-items" ondragover="allowTierDrop(event)" ondrop="handleTierDrop(event, 'B')"></div>
+                            </div>
+                            <div class="tier-row" data-tier="C">
+                                <div class="tier-row-label" style="background:#10b981;" onclick="editTierRowLabel(this)">C</div>
+                                <div class="tier-row-items" ondragover="allowTierDrop(event)" ondrop="handleTierDrop(event, 'C')"></div>
+                            </div>
+                            <div class="tier-row" data-tier="D">
+                                <div class="tier-row-label" style="background:#6366f1;" onclick="editTierRowLabel(this)">D</div>
+                                <div class="tier-row-items" ondragover="allowTierDrop(event)" ondrop="handleTierDrop(event, 'D')"></div>
+                            </div>
+                        </div>
+
+                        <!-- 未配置キャラのドック -->
+                        <div style="margin-top:20px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="font-size:13px; color:var(--text-muted);">キャラクター一覧（ドラッグして配置できます）:</strong>
+                            </div>
+                            <div id="boardCharDock" class="char-token-dock" ondragover="allowTierDrop(event)" ondrop="handleDockDrop(event)"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 3. 各種モーダル・オーバーレイ -->
+    <!-- ============================================== -->
+
+    <!-- キャラクター個別ページ（全身立ち絵・なでなでインタラクション機能付き） -->
+    <div id="characterDetailOverlay" class="char-detail-overlay">
+        <div class="char-detail-backdrop" onclick="closeCharacterDetail()"></div>
+        <div class="char-detail-panel">
+            <div class="char-detail-top-nav">
+                <button type="button" class="char-detail-back" onclick="closeCharacterDetail()" data-i18n="char.backBtn">← 戻る</button>
+                <div class="char-detail-mode-switches">
+                    <button type="button" id="patpatModeToggleBtn" class="patpat-toggle-btn" onclick="togglePatPatMode()">[撫でる] なでなでモード</button>
+                    <button type="button" class="cheer-char-btn" onclick="openSendCheerModal(true)">ファンレターを送る</button>
+                </div>
+            </div>
+
+            <!-- なでなで通知・セリフフキダシ -->
+            <div id="patpatSpeechBubble" class="patpat-speech-bubble" style="display:none;"></div>
+
+            <div class="char-detail-top">
+                <!-- 左側：全身大立ち絵（なでなでターゲット） -->
+                <div class="char-detail-main-art" id="patpatTargetArea">
+                    <img id="charDetailMainImg" src="" alt="立ち絵" onclick="handleMainArtClick(event)">
+                    <div id="patpatEffectLayer" class="patpat-effect-layer"></div>
+                    <div id="patpatCounterBadge" class="patpat-counter-badge" style="display:none;">なでなで: <span id="patpatCountText">0</span>回</div>
+                </div>
+                
+                <!-- 右側：プロフィール＆ゲーム風衣装・表情パレット -->
+                <div class="char-detail-side">
+                    <div class="char-detail-heading-area">
+                        <h2 id="charDetailName"></h2>
+                        <span id="charDetailWorldPill" class="char-detail-world-pill"></span>
+                    </div>
+
+                    <!-- ゲーム風衣装パレット -->
+                    <div class="game-palette-block">
+                        <div class="palette-title">衣装セレクト</div>
+                        <div class="char-detail-altart" id="charDetailAltArt"></div>
+                    </div>
+
+                    <!-- 表情差分パレット -->
+                    <div class="game-palette-block" id="charDetailExpressionsBlock">
+                        <div class="palette-title">表情セレクト</div>
+                        <div class="char-detail-expressions" id="charDetailExpressions"></div>
+                    </div>
+
+                    <div class="char-detail-profile" id="charDetailProfile"></div>
+                </div>
+            </div>
+
+            <!-- 個別ギャラリー -->
+            <div class="char-detail-gallery-section">
+                <h3 data-i18n="char.detailGalleryTitle">キャラクターギャラリー</h3>
+                <div class="char-detail-gallery-grid" id="charDetailGalleryGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- テーマ・背景カスタマイズモーダル -->
+    <div id="themeCustomizeModal" class="custom-modal-overlay" style="display:none;">
+        <div class="custom-modal-box">
+            <h3>サイト全体の背景・デザイン設定</h3>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:-6px;">創作空間の雰囲気に合わせて、背景色や画像を設定できます。</p>
+
+            <label class="input-label">プリセットテーマから選ぶ:</label>
+            <div class="theme-preset-grid">
+                <button type="button" class="theme-preset-card theme-p-light" onclick="applyPresetTheme('light')">パステル・昼</button>
+                <button type="button" class="theme-preset-card theme-p-dark" onclick="applyPresetTheme('dark')">ミッドナイト</button>
+                <button type="button" class="theme-preset-card theme-p-fantasy" onclick="applyPresetTheme('fantasy')">羊皮紙・ファンタジー</button>
+                <button type="button" class="theme-preset-card theme-p-cyber" onclick="applyPresetTheme('cyber')">サイバー・ネオン</button>
+                <button type="button" class="theme-preset-card theme-p-gothic" onclick="applyPresetTheme('gothic')">ゴシック・夜想</button>
+            </div>
+
+            <label class="input-label" style="margin-top:12px;">背景画像URL（任意）:</label>
+            <input id="themeBgImageUrl" placeholder="https://example.com/background.jpg">
+
+            <div style="display:flex; gap:8px; margin-top:16px;">
+                <button type="button" class="header-btn success" style="flex:1;" onclick="saveThemeSettings()">保存する</button>
+                <button type="button" class="header-btn secondary" style="flex:1;" onclick="closeThemeModal()">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ファンアート・応援メッセージ送信モーダル（匿名応援） -->
+    <div id="sendCheerModal" class="custom-modal-overlay" style="display:none;">
+        <div class="custom-modal-box">
+            <h3 id="sendCheerModalTitle">作者を応援する</h3>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:-6px;">匿名で温かいメッセージやファンアートを贈ることができます。</p>
+
+            <label class="input-label">お名前（ペンネーム・匿名可）</label>
+            <input id="cheerSenderName" placeholder="名無しさん">
+
+            <label class="input-label">応援メッセージ <span class="required">*</span></label>
+            <textarea id="cheerMessage" placeholder="作品やキャラへの感想、応援の言葉をどうぞ" style="height:100px;"></textarea>
+
+            <label class="input-label">ファンアート・イラスト（任意）</label>
+            <input type="file" id="cheerImageFile" accept="image/*">
+            <div id="cheerImagePreview" style="margin-top:5px;"></div>
+
+            <div style="display:flex; gap:8px; margin-top:16px;">
+                <button type="button" class="header-btn success" style="flex:1;" onclick="submitCheerMessage()">送信する</button>
+                <button type="button" class="header-btn secondary" style="flex:1;" onclick="closeSendCheerModal()">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 届いた応援ボックス（作者専用） -->
+    <div id="cheerInboxModal" class="custom-modal-overlay" style="display:none;">
+        <div class="custom-modal-box" style="max-width:680px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>届いた応援・ファンアート一覧</h3>
+                <button type="button" onclick="closeCheerInboxModal()" class="form-close-x-btn">✕</button>
+            </div>
+            <p style="font-size:12px; color:var(--text-muted);">あなたやキャラクターへ贈られたメッセージです。</p>
+            <div id="cheerInboxList" class="cheer-inbox-list"></div>
+        </div>
+    </div>
+
+    <!-- 初回チュートリアル＆ヘルプモーダル -->
+    <div id="helpTutorialModal" class="custom-modal-overlay" style="display:none;">
+        <div class="custom-modal-box help-tutorial-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>使い方ガイド・ヘルプ</h3>
+                <button type="button" onclick="closeHelpModal()" class="form-close-x-btn">✕</button>
+            </div>
+            
+            <div class="tutorial-steps-container">
+                <div class="tutorial-step-card">
+                    <div class="step-num">1</div>
+                    <div class="step-body">
+                        <strong>Googleログイン ＆ ネット保存</strong>
+                        <p>右上の「Googleでログイン」を押し、編集後に「ネットに保存」を押すだけで、あなた専用のWikiが世界に公開されます。</p>
+                    </div>
+                </div>
+                <div class="tutorial-step-card">
+                    <div class="step-num">2</div>
+                    <div class="step-body">
+                        <strong>左下のボタンでキャラ追加</strong>
+                        <p>左下の四角いボタンを押すと入力フォームがぽわんと開きます。衣装差分・表情差分・YouTubeイメソン・TRPGインポートに対応！</p>
+                    </div>
+                </div>
+                <div class="tutorial-step-card">
+                    <div class="step-num">3</div>
+                    <div class="step-body">
+                        <strong>キャラ個別ページで「なでなで」！</strong>
+                        <p>カードの「キャラクターを個別にみる」を開くと全身立ち絵が登場。「なでなでモード」を押して立ち絵をクリック・ドラッグでなでなでできます。</p>
+                    </div>
+                </div>
+                <div class="tutorial-step-card">
+                    <div class="step-num">4</div>
+                    <div class="step-body">
+                        <strong>世界観事典 ＆ 小説の縦書きシアター</strong>
+                        <p>「事典」では用語や能力・歴史を本のように執筆。「小説」ではシリーズごとにAI執筆や縦書き文庫本ビューで物語を紡げます。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align:center; margin-top:16px;">
+                <button type="button" class="header-btn primary" onclick="closeHelpModal()" style="padding:10px 30px; font-size:14px;">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- お問い合わせ・ご意見モーダル -->
+    <div id="feedbackModal" class="custom-modal-overlay" style="display:none;">
+        <div class="custom-modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>お問い合わせ・バグ報告</h3>
+                <button type="button" onclick="closeFeedbackModal()" class="form-close-x-btn">✕</button>
+            </div>
+            <p style="font-size:13px; color:var(--text-muted);">機能の不具合や「こんな機能がほしい！」などのご要望をお寄せください。</p>
+            <label class="input-label">お名前（任意）</label>
+            <input id="feedbackName" placeholder="名無しさん">
+            <label class="input-label">内容 <span class="required">*</span></label>
+            <textarea id="feedbackText" placeholder="不具合の状況や追加してほしい機能など..." style="height:120px;"></textarea>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+                <button type="button" class="header-btn success" style="flex:1;" onclick="submitFeedback()">送信する</button>
+                <button type="button" class="header-btn secondary" style="flex:1;" onclick="closeFeedbackModal()">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 画像拡大モーダル -->
+    <div id="imageModal" onclick="closeModal()" style="display: none;">
+        <img id="modalImage" src="" alt="拡大画像">
+    </div>
+
+    <!-- 誕生日お祝いポップアップ -->
+    <div id="birthdayPopup" style="display:none;">
+        <div class="birthday-popup-card">
+            <div style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: var(--primary); margin-bottom: 10px;">HAPPY BIRTHDAY!</div>
+            <div id="birthdayPopupContent"></div>
+            <div style="margin-top: 8px; color:var(--text-muted); font-size: 13px;" data-i18n="birthday.congrats">お誕生日おめでとうございます！</div>
+            <button onclick="closeBirthdayPopup()" style="margin-top: 15px;" class="header-btn primary" data-i18n="common.close">閉じる</button>
+        </div>
+    </div>
+
+    <!-- 公開設定パネル -->
+    <div id="settingsPanel" style="display:none;">
+        <div class="settings-modal-card">
+            <h3 data-i18n="settings.title">サイトの公開設定</h3>
+            <label class="input-label" data-i18n="settings.pageVisibilityLabel">あなたのページの公開範囲</label>
+            <label class="radio-option-label">
+                <input type="radio" name="pageVisibility" id="visibilityPublic" value="public">
+                <span data-i18n="settings.public">全体公開（スタートページの一覧に表示される）</span>
+            </label>
+            <label class="radio-option-label">
+                <input type="radio" name="pageVisibility" id="visibilityUnlisted" value="unlisted">
+                <span data-i18n="settings.unlisted">限定公開（URLを知っている人だけが見られる。一覧には出ない）</span>
+            </label>
+            <div style="display:flex; gap:8px; margin-top:15px;">
+                <button type="button" onclick="saveSettingsPanel()" class="header-btn success" style="flex:1;" data-i18n="common.save">保存する</button>
+                <button type="button" onclick="closeSettingsPanel()" class="header-btn secondary" style="flex:1;" data-i18n="common.cancel">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <!-- アプリメインJS -->
+    <script src="script.js"></script>
+</body>
+</html>
